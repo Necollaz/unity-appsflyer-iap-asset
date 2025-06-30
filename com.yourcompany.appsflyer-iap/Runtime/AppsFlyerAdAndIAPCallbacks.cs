@@ -7,8 +7,6 @@ public class AppsFlyerAdAndIAPCallbacks : MonoBehaviour, IAppsFlyerConversionDat
 {
 #if UNITY_ANDROID && AMAZON_STORE
     private const Store CURRENT_STORE = Store.AMAZON;
-#elif UNITY_ANDROID
-        private const Store CURRENT_STORE = Store.GOOGLE;
 #else
         private const Store CURRENT_STORE = Store.GOOGLE;
 #endif
@@ -56,31 +54,22 @@ public class AppsFlyerAdAndIAPCallbacks : MonoBehaviour, IAppsFlyerConversionDat
 
     private void OnAdRevenuePaid(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
-        Debug.Log($"[AF AdRevenue] unit={adUnitId} revenue={adInfo.Revenue}");
+        Debug.Log($"[AF AdRevenue] unit={adUnitId} net={{adInfo.NetworkName}} fmt={{adInfo.AdFormat}} rev={{adInfo.Revenue}})");
         
-        double revenue = adInfo.Revenue;
-        string network = adInfo.NetworkName;
-        string placement = adInfo.Placement;
-        string format = adInfo.AdFormat;
-
-        Debug.Log($"[AF AdRevenue] unit={adUnitId} network={network} format={format} revenue={revenue}");
-        
-        var data = new AFAdRevenueData(network, MediationNetwork.ApplovinMax, "USD", revenue);
-        var extras = new Dictionary<string, string> { [AdRevenueScheme.AD_UNIT]   = adUnitId, [AdRevenueScheme.AD_TYPE]   = format, [AdRevenueScheme.PLACEMENT] = placement };
+        var data = new AFAdRevenueData(adInfo.NetworkName, MediationNetwork.ApplovinMax, "USD", adInfo.Revenue);
+        var extras = new Dictionary<string, string> { [AdRevenueScheme.AD_UNIT] = adUnitId, [AdRevenueScheme.AD_TYPE] = adInfo.AdFormat, [AdRevenueScheme.PLACEMENT] = adInfo.Placement };
         AppsFlyer.logAdRevenue(data, extras);
     }
     
     private void InitAppsFlyer()
     {
-        Debug.Log("[AF] InitAppsFlyer()");
-        
 #if !DEVELOPMENT_BUILD && !UNITY_EDITOR
         _enableDebugLogs = false;
 #endif
         AppsFlyer.setIsDebug(_enableDebugLogs);
         
 #if UNITY_IOS && !UNITY_EDITOR
-        AppsFlyer.initSDK(appsFlyerDevKey, _iosAppId, this);
+        AppsFlyer.initSDK(_appsFlyerDevKey, _iosAppId, this);
 #else
         AppsFlyer.initSDK(_appsFlyerDevKey, "", this);
 #endif
@@ -88,8 +77,6 @@ public class AppsFlyerAdAndIAPCallbacks : MonoBehaviour, IAppsFlyerConversionDat
 
     private void InitPurchaseConnector()
     {
-        Debug.Log("[AF] InitPurchaseConnector()");
-        
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
         AppsFlyerPurchaseConnector.setIsSandbox(true);
 #endif
