@@ -8,6 +8,5 @@
 !package.json
 
 # Папка UPM-пакета и весь её контент
-!Packages/
-!Packages/com.yourcompany.appsflyer-iap/
-!Packages/com.yourcompany.appsflyer-iap/**
+!com.yourcompany.appsflyer-iap/
+!com.yourcompany.appsflyer-iap/**
