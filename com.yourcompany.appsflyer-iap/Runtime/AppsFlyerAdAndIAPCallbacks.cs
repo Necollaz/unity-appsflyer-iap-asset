@@ -40,7 +40,7 @@ public class AppsFlyerAdAndIAPCallbacks : MonoBehaviour, IAppsFlyerConversionDat
     private void InitAppsFlyer()
     {
 #if !DEVELOPMENT_BUILD && !UNITY_EDITOR
-        enableDebugLogs = false;
+        _enableDebugLogs = false;
 #endif
         AppsFlyer.setIsDebug(_enableDebugLogs);
         
