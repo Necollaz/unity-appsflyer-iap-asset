@@ -1,0 +1,14 @@
+# Ignore everything by default
+*
+
+# Un-ignore only your UPM package folder
+!com.yourcompany.appsflyer-iap/
+!com.yourcompany.appsflyer-iap/**
+
+# Ensure .gitignore itself and package.json (if you have one) stay tracked
+!.gitignore
+!package.json
+
+# Explicitly ignore IDE settings and docs
+.idea/
+README.md
