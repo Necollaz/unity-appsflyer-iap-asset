@@ -1,14 +1,15 @@
-# Ignore everything by default
-*
+# Git settings
+!.gitignore
 
-# Un-ignore only your UPM package folder
+# Описатель UPM-пакета
+!package.json
+
+# Папка UPM-пакета
 !com.yourcompany.appsflyer-iap/
 !com.yourcompany.appsflyer-iap/**
 
-# Ensure .gitignore itself and package.json (if you have one) stay tracked
-!.gitignore
-!package.json
+# Теперь снова отслеживаем README.md
+!README.md
 
-# Explicitly ignore IDE settings and docs
+# Явно игнорируем IDE-папку
 .idea/
-README.md
