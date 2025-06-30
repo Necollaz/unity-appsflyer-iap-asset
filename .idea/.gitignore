@@ -1,6 +1,4 @@
-# Документация (опционально)
-!README.md
-
-# Папка UPM-пакета и весь её контент
 !com.yourcompany.appsflyer-iap/
 !com.yourcompany.appsflyer-iap/**
+
+.idea/

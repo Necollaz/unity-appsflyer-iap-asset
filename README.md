@@ -6,15 +6,8 @@
 
 ## Установка
 
-1. В Unity откройте **Window → Package Manager**.  
-2. Нажмите на кнопку **+** → **Add package from git URL…**  
-3. Вставьте: https://github.com/Necollaz/unity-appsflyer-asset.git#v1.0.0
-4. Нажмите **Add**.
-
-После этого в вашем проекте появится:
-- Папка `Packages/com.yourcompany.appsflyer-iap/Runtime/AppsFlyerSDK`
-- Папка `Packages/com.yourcompany.appsflyer-iap/Runtime/AppsFlyerPurchaseConnector`
-- Ваш скрипт `AppsFlyerAdAndIAPCallbacks`
+1. Скачайте данный архир и установите в корень проекта.
+2. Если в проекте не имеется плагина AppLovin MAX, скачать по ссылке: https://github.com/AppLovin/AppLovin-MAX-Unity-Plugin/releases
 
 ## Как пользоваться
 
