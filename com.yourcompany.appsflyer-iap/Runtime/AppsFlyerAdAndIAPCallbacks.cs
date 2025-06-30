@@ -39,11 +39,35 @@ public class AppsFlyerAdAndIAPCallbacks : MonoBehaviour, IAppsFlyerConversionDat
     private void OnEnable()
     {
         MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnAdRevenuePaid;
+        MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent += OnAdRevenuePaid;
+        MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent += OnAdRevenuePaid;
+        MaxSdkCallbacks.MRec.OnAdRevenuePaidEvent += OnAdRevenuePaid;
+        MaxSdkCallbacks.AppOpen.OnAdRevenuePaidEvent += OnAdRevenuePaid;
     }
-
+    
     private void OnDisable()
     {
         MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
+        MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
+        MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
+        MaxSdkCallbacks.MRec.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
+        MaxSdkCallbacks.AppOpen.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
+    }
+
+    private void OnAdRevenuePaid(string adUnitId, MaxSdkBase.AdInfo adInfo)
+    {
+        Debug.Log($"[AF AdRevenue] unit={adUnitId} revenue={adInfo.Revenue}");
+        
+        double revenue = adInfo.Revenue;
+        string network = adInfo.NetworkName;
+        string placement = adInfo.Placement;
+        string format = adInfo.AdFormat;
+
+        Debug.Log($"[AF AdRevenue] unit={adUnitId} network={network} format={format} revenue={revenue}");
+        
+        var data = new AFAdRevenueData(network, MediationNetwork.ApplovinMax, "USD", revenue);
+        var extras = new Dictionary<string, string> { [AdRevenueScheme.AD_UNIT]   = adUnitId, [AdRevenueScheme.AD_TYPE]   = format, [AdRevenueScheme.PLACEMENT] = placement };
+        AppsFlyer.logAdRevenue(data, extras);
     }
     
     private void InitAppsFlyer()
@@ -79,22 +103,6 @@ public class AppsFlyerAdAndIAPCallbacks : MonoBehaviour, IAppsFlyerConversionDat
         AppsFlyerPurchaseConnector.startObservingTransactions();
     }
 
-    private void OnAdRevenuePaid(string adUnitId, MaxSdkBase.AdInfo adInfo)
-    {
-        Debug.Log($"[AF AdRevenue] unit={adUnitId} revenue={adInfo.Revenue}");
-        
-        double revenue = adInfo.Revenue;
-        string network = adInfo.NetworkName;
-        string placement = adInfo.Placement;
-        string format = adInfo.AdFormat;
-
-        Debug.Log($"[AF AdRevenue] unit={adUnitId} network={network} format={format} revenue={revenue}");
-        
-        var data = new AFAdRevenueData(network, MediationNetwork.ApplovinMax, "USD", revenue);
-        var extras = new Dictionary<string, string> { [AdRevenueScheme.AD_UNIT]   = adUnitId, [AdRevenueScheme.AD_TYPE]   = format, [AdRevenueScheme.PLACEMENT] = placement };
-        AppsFlyer.logAdRevenue(data, extras);
-    }
-    
     public void onConversionDataSuccess(string conversionData)
     {
         Debug.Log("[AF] ConversionData: " + conversionData);
