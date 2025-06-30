@@ -1,38 +1,28 @@
 # ─────────────────────────────────────────────────────────────────────────────
-#               Git ignore everything except these folders/files
+#                 Игнорируем всё по умолчанию
 # ─────────────────────────────────────────────────────────────────────────────
-
-# Ignore all files by default
 *
 
-# Un-ignore version control settings
+# ─────────────────────────────────────────────────────────────────────────────
+#               Разрешаем важные файлы/папки
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Git settings
 !.gitignore
 
-# Un-ignore package descriptor
+# Описатель UPM-пакета
 !package.json
 
-# Un-ignore your AppsFlyer SDK folder and all its contents
-!AppsFlyer/
-!AppsFlyer/**
-
-# Un-ignore your Purchase Connector folder and all its contents
-!AppsFlyerPurchaseConnector/
-!AppsFlyerPurchaseConnector/**
-
-# Un-ignore your custom runtime scripts folder (if any)
-!Runtime/
-!Runtime/**
-
-# If you later add other top-level files you want to include,
-# add explicit !<filename> lines here.
+# Пакет Unity Package Manager
+!Packages/
+!Packages/com.yourcompany.appsflyer-iap/
+!Packages/com.yourcompany.appsflyer-iap/**
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Note:
-# This setup will keep only:
-#   • AppsFlyer/*
-#   • AppsFlyerPurchaseConnector/*
-#   • Runtime/*
+# Примечание:
+# Будут включены:
 #   • package.json
 #   • .gitignore
-# in your repo. Everything else will be ignored.
+#   • вся папка Packages/com.yourcompany.appsflyer-iap/ и её содержимое
+# Всё остальное будет проигнорировано.
 # ─────────────────────────────────────────────────────────────────────────────
