@@ -32,11 +32,34 @@ public class AppsFlyerAdAndIAPCallbacks : MonoBehaviour, IAppsFlyerConversionDat
 
         DontDestroyOnLoad(gameObject);
         InitAppsFlyer();
-        InitPurchaseConnector();
-
         AppsFlyer.startSDK();
+        InitPurchaseConnector();
+    }
+    
+    private void OnEnable()
+    {
+        MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnAdRevenuePaid;
     }
 
+    private void OnDisable()
+    {
+        MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
+    }
+
+    private void OnAdRevenuePaid(string adUnitId, MaxSdkBase.AdInfo adInfo)
+    {
+        double revenue = adInfo.Revenue;
+        string network = adInfo.NetworkName;
+        string placement = adInfo.Placement;
+        string format = adInfo.AdFormat;
+
+        Debug.Log($"[AF AdRevenue] unit={adUnitId} network={network} format={format} revenue={revenue}");
+        
+        var data = new AFAdRevenueData(network, MediationNetwork.ApplovinMax, "USD", revenue);
+        var extras = new Dictionary<string, string> { [AdRevenueScheme.AD_UNIT]   = adUnitId, [AdRevenueScheme.AD_TYPE]   = format, [AdRevenueScheme.PLACEMENT] = placement };
+        AppsFlyer.logAdRevenue(data, extras);
+    }
+    
     private void InitAppsFlyer()
     {
 #if !DEVELOPMENT_BUILD && !UNITY_EDITOR
@@ -45,7 +68,7 @@ public class AppsFlyerAdAndIAPCallbacks : MonoBehaviour, IAppsFlyerConversionDat
         AppsFlyer.setIsDebug(_enableDebugLogs);
         
 #if UNITY_IOS && !UNITY_EDITOR
-            AppsFlyer.initSDK(appsFlyerDevKey, iosAppId, this);
+        AppsFlyer.initSDK(appsFlyerDevKey, _iosAppId, this);
 #else
         AppsFlyer.initSDK(_appsFlyerDevKey, "", this);
 #endif
@@ -66,23 +89,23 @@ public class AppsFlyerAdAndIAPCallbacks : MonoBehaviour, IAppsFlyerConversionDat
         AppsFlyerPurchaseConnector.startObservingTransactions();
     }
 
-    private void OnEnable()
-    {
-        MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnAdRevenuePaid;
-        MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent += OnAdRevenuePaid;
-        MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent += OnAdRevenuePaid;
-        MaxSdkCallbacks.MRec.OnAdRevenuePaidEvent += OnAdRevenuePaid;
-        MaxSdkCallbacks.AppOpen.OnAdRevenuePaidEvent += OnAdRevenuePaid;
-    }
-
-    private void OnDisable()
-    {
-        MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
-        MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
-        MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
-        MaxSdkCallbacks.MRec.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
-        MaxSdkCallbacks.AppOpen.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
-    }
+    // private void OnEnable()
+    // {
+    //     MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnAdRevenuePaid;
+    //     MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent += OnAdRevenuePaid;
+    //     MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent += OnAdRevenuePaid;
+    //     MaxSdkCallbacks.MRec.OnAdRevenuePaidEvent += OnAdRevenuePaid;
+    //     MaxSdkCallbacks.AppOpen.OnAdRevenuePaidEvent += OnAdRevenuePaid;
+    // }
+    //
+    // private void OnDisable()
+    // {
+    //     MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
+    //     MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
+    //     MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
+    //     MaxSdkCallbacks.MRec.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
+    //     MaxSdkCallbacks.AppOpen.OnAdRevenuePaidEvent -= OnAdRevenuePaid;
+    // }
     
     private void OnAdRevenuePaid(string adUnitId, MaxSdkBase.AdInfo adInfo)
     {
