@@ -15,7 +15,7 @@ public class AppsFlyerAdAndIAPCallbacks : MonoBehaviour, IAppsFlyerConversionDat
 
     [Header("AppsFlyer Credentials")]
     [SerializeField, Tooltip("Dev Key из панели AppsFlyer (All Platforms)")] private string _appsFlyerDevKey = "e2GAFEK3u92ZRGPjhAq3r8";
-    [SerializeField, Tooltip("iOS App ID без префикса 'id' — используется только для iOS")] private string _iosAppId = "123456789";
+    [SerializeField, Tooltip("Apple ID без префикса 'id' — используется только для iOS")] private string _iosAppId = "123456789";
     [SerializeField, Tooltip("Включить детальные логи SDK (оставьте true для отладки)")] private bool _enableDebugLogs = true;
 
     private void Awake()

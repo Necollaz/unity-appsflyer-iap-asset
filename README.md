@@ -16,7 +16,7 @@
 2. В сцене создайте пустой GameObject и прикрепите к нему компонент `AppsFlyerAdAndIAPCallbacks`.  
 3. В инспекторе заполните поля:
     - **AppsFlyer Dev Key** — ваш Dev Key из панели AppsFlyer (All Platforms).
-    - **iOS App ID** — ваш App ID в App Store (без префикса `id`).
+    - **iOS App ID** — ваш Apple ID в App Store (без префикса `id`).
     - **Enable Debug Logs** — оставьте `true` для логирования в консоль (рекомендуется в процессе отладки).
 4. Соберите и запустите на нужной платформе — SDK сам:
    - Инициализируется,
@@ -56,7 +56,7 @@ private void Awake()
    - Вызывает `AppsFlyer.initSDK(devKey, appId, this)`:
      - Под Android передаётся пустая строка вместо appId.
      - Под iOS — оба параметра (devKey + iosAppId).
-     - 
+
 2.`AppsFlyer.startSDK()` — отправляет внутри “first launch” и запускает загрузку кэша и конфигов.
 3.`InitPurchaseConnector()`
 
@@ -157,7 +157,7 @@ public void didReceivePurchaseRevenueError(string error) { … }
    - Если `OnAdRevenuePaid` не вызывается — скорее всего, не настроены SDK callback’ы MaxSdk.
    - Посмотрите, появляются ли события в логах Applovin MAX.
 
-## Когда нужно вызывать что-то в других классах
+## Когда нужно вызывать что-то в других классах (если нужно ручное управление)
 
 Единственная ситуация, когда придётся обращаться к AppsFlyer в своём коде — это **ручная отправка покупки**, если вы не используете Unity IAP или хотите полный контроль над параметрами. В этом случае после успешного платежа нужно вызвать:
 ```csharp
@@ -171,7 +171,7 @@ AppsFlyer.validateAndTrackInAppPurchase(
 );
 ```
 - `productId`, `price`, `currency` и `transactionId` берутся из вашего объекта покупки.
-- Для **iOS** обычно нужен только `receipt`, для **Android** — `receipt` + `signature`.
+- Для **iOS** нужен только `receipt`, для **Android** — `receipt` + `signature`.
 
   ### Пример:
 ```csharp
