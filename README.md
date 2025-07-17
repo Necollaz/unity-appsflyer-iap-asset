@@ -29,6 +29,9 @@
 
 ### 1. Жизненный цикл и инициализация
 
+<details>
+<summary>Сам жизненый цикл</summary>
+
 ```csharp
 private void Awake()
 {
@@ -51,6 +54,8 @@ private void Awake()
     InitPurchaseConnector();
 }
 ```
+</details>
+
 1.InitAppsFlyer()
    - Включает или выключает отладочные логи через `AppsFlyer.setIsDebug(_enableDebugLogs)`.
    - Вызывает `AppsFlyer.initSDK(devKey, appId, this)`:
@@ -96,8 +101,9 @@ AppsFlyerPurchaseConnector.startObservingTransactions();
 MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnAdRevenuePaid;
 // то же для Rewarded, Banner, MRec, AppOpen
 ```
+<details>
+<summary>Метод обработки:</summary>
 
-Метод обработки:
 ```csharp
 private void OnAdRevenuePaid(string adUnitId, MaxSdkBase.AdInfo adInfo)
 {
@@ -119,8 +125,9 @@ private void OnAdRevenuePaid(string adUnitId, MaxSdkBase.AdInfo adInfo)
 }
 ```
 
-   - Обязательно вызываем `AppsFlyer.logAdRevenue` с `AFAdRevenueData` и картой `extras`.
-   - Логи появляются с префиксом `[AF AdRevenue]` — их легко фильтровать.
+- Обязательно вызываем `AppsFlyer.logAdRevenue` с `AFAdRevenueData` и картой `extras`.
+- Логи появляются с префиксом `[AF AdRevenue]` — их легко фильтровать.
+</details>
 
 ### 3. Реализация IAppsFlyerConversionData
 Интерфейс нужен для получения данных атрибуции и валидации покупок:
@@ -173,7 +180,9 @@ AppsFlyer.validateAndTrackInAppPurchase(
 - `productId`, `price`, `currency` и `transactionId` берутся из вашего объекта покупки.
 - Для **iOS** нужен только `receipt`, для **Android** — `receipt` + `signature`.
 
-  ### Пример:
+<details>
+<summary>Пример</summary>
+
 ```csharp
 public class MyPurchaseManager : MonoBehaviour
 {
@@ -206,9 +215,136 @@ public class MyPurchaseManager : MonoBehaviour
     }
 }
 ```
+</details>
 
 **ВАЖНО**: если вы **НЕ** делаете вручную `validateAndTrackInAppPurchase`, а полагаетесь на `AppsFlyerPurchaseConnector`, 
 то **НИКАКИХ** дополнительных вызовов из других классов делать не нужно — Connector автоматически отловит транзакцию и отправит её в AppsFlyer.
+
+## Настройка LVL (License Verification Library)
+Пошаговая инструкция по добавлению проверки лицензии Google Play (LVL) для Android-версии.
+### Получение лицензионного ключа (Public Key)
+- Открыть Google Play Console → проект → Setup → App integrity.
+- В разделе License key скопировать строку вида MIIBIjANBgkqhki….
+- Сохраните её — она понадобится в плагине.
+### Добавление google-play-licensing.jar
+- В Android SDK путь к библиотеке:<Android SDK>/extras/google/play_licensing/lib/google-play-licensing.jar.
+- Скопировать этот файл в папку Assets/Plugins/Android/libs/ вашего проекта.
+  - Если папки нет, создайте её вручную.
+### Java‑плагин для Unity
+В Assets/Plugins/Android/src/com/yourcompany/licensing/ создать два файла:
+<details>
+<summary>ObfuscatorUtil.java</summary>
+
+   ```csharp
+package com.yourcompany.licensing;
+
+import android.content.Context;
+import android.provider.Settings;
+
+public class ObfuscatorUtil
+{
+    public static String getDeviceId(Context context)
+    {
+        return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+    }
+}
+```
+</details>
+<details>
+<summary>LicenseCheckerBridge.java</summary>
+
+ ```csharp
+package com.yourcompany.licensing;
+
+import android.app.Activity;
+import android.widget.Toast;
+import com.android.vending.licensing.*;
+
+public class LicenseCheckerBridge {
+    private static final String BASE64_PUBLIC_KEY = "ВАШ_ПУБЛИЧНЫЙ_КЛЮЧ";
+    private static LicenseChecker mChecker;
+    private static Policy mPolicy;
+
+    public static void init(Activity activity) {
+        mPolicy = new ServerManagedPolicy(
+            activity,
+            new AESObfuscator(
+                ObfuscatorUtil.getDeviceId(activity).getBytes(),
+                activity.getPackageName(),
+                BASE64_PUBLIC_KEY
+            )
+        );
+        mChecker = new LicenseChecker(activity, mPolicy, BASE64_PUBLIC_KEY);
+    }
+
+    public static void checkLicense(final Activity activity) {
+        if (mChecker == null) init(activity);
+        mChecker.checkAccess(new LicenseCheckerCallback() {
+            @Override
+            public void allow(int reason) {
+                activity.runOnUiThread(() ->
+                    Toast.makeText(activity, "The license has been confirmed", Toast.LENGTH_SHORT).show()
+                );
+            }
+
+            @Override
+            public void dontAllow(int reason) {
+                activity.runOnUiThread(() ->
+                    Toast.makeText(activity, "Please purchase the game from Google Play.", Toast.LENGTH_LONG).show()
+                );
+                activity.finish();
+            }
+
+            @Override
+            public void applicationError(int errorCode) {
+                activity.runOnUiThread(() ->
+                    Toast.makeText(
+                        activity,
+                        "License verification error: " + errorCode,
+                        Toast.LENGTH_LONG
+                    ).show()
+                );
+            }
+        });
+    }
+}
+```
+</details>
+
+### C#‑обёртка в Unity
+В папке Assets/Scripts/ создайте файл:
+
+<details>
+<summary>LicenseManager.cs</summary>
+
+```csharp
+using UnityEngine;
+
+public class LicenseManager : MonoBehaviour
+{
+    void Start()
+    {
+        var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+        var activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+        var bridge = new AndroidJavaClass("com.yourcompany.licensing.LicenseCheckerBridge");
+
+        bridge.CallStatic("init", activity);
+        bridge.CallStatic("checkLicense", activity);
+    }
+}
+```
+
+- Путь к вашему Java-классу
+    ```csharp
+    var bridge = new AndroidJavaClass("com.yourcompany.licensing.LicenseCheckerBridge");
+    ```
+  Если в LicenseCheckerBridge.java мы указали свой package (например, com.acme.mygame.licensing), то здесь должно быть точно такое же:
+    ```csharp
+    var bridge = new AndroidJavaClass("com.acme.mygame.licensing.LicenseCheckerBridge");
+    ```
+</details>
+
+Прикрепите этот скрипт к объекту на стартовой сцене.
 
 ## Теги
 
